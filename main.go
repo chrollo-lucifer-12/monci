@@ -1,3 +1,0 @@
-package monci
-
-func main() {}
