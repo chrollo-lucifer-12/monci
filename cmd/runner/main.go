@@ -27,8 +27,7 @@ func main() {
 
 		err := executor.RunJob(job)
 		if err != nil {
-			fmt.Println("pipeline failed")
-			os.Exit(0)
+			panic(err)
 		}
 	}
 

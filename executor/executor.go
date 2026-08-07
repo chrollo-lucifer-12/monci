@@ -2,8 +2,6 @@ package executor
 
 import (
 	"fmt"
-	"os"
-	"os/exec"
 
 	"github.com/monci/workflow"
 )
@@ -15,26 +13,42 @@ func RunJob(job workflow.Job) error {
 	fmt.Println()
 	fmt.Println()
 
+	containerName := "test"
+
+	err := createContainer(containerName)
+	if err != nil {
+		return err
+	}
+	err = startContainer(containerName)
+	if err != nil {
+		return err
+	}
+
 	for i, step := range job.Steps {
 		fmt.Printf("[%d/%d] %s", i+1, len(job.Steps), step.Name)
 		fmt.Println()
 		fmt.Println()
 
-		cmd := exec.Command("bash", "-c", step.Run)
+		fmt.Println(step.Run)
 
-		fmt.Println(cmd.String())
+		err := execCommand(containerName, step.Run)
 
-		cmd.Stdout = os.Stdout
-		cmd.Stderr = os.Stderr
-
-		err := cmd.Run()
 		if err != nil {
 			fmt.Printf("step failed: %s\n", step.Name)
+			err = stopContainer(containerName)
+			if err != nil {
+				return err
+			}
 			return err
 		}
 
 		fmt.Printf(">\n")
 		fmt.Println()
+	}
+
+	err = stopContainer(containerName)
+	if err != nil {
+		return err
 	}
 
 	fmt.Printf("job succeeded\n")
