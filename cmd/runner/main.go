@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/exec"
 
+	"github.com/monci/executor"
 	"github.com/monci/workflow"
 )
 
@@ -25,19 +25,12 @@ func main() {
 	for _, job := range workflow.Jobs {
 		fmt.Printf("running job: %s\n", job.Name)
 
-		for _, step := range job.Steps {
-			fmt.Printf("running step: %s\n", step.Name)
-
-			cmd := exec.Command("bash", "-c", step.Run)
-
-			cmd.Stdout = os.Stdout
-			cmd.Stderr = os.Stderr
-
-			err := cmd.Run()
-			if err != nil {
-				panic(err)
-			}
+		err := executor.RunJob(job)
+		if err != nil {
+			fmt.Println("pipeline failed")
+			os.Exit(0)
 		}
-
 	}
+
+	fmt.Println("pipeline succeeded")
 }
